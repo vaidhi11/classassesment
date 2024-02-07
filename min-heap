@@ -1,0 +1,122 @@
+#include <iostream>
+#include <climits> // for INT_MIN
+using namespace std;
+
+class MinHeap {
+    int* arr;
+    int maxSize;
+    int heapSize;
+
+public:
+    MinHeap(int maxSize);
+    void MinHeapify(int i);
+
+    int parent(int i) { return (i - 1) / 2; }
+    int leftChild(int i) { return (2 * i + 1); }
+    int rightChild(int i) { return (2 * i + 2); }
+
+    int removeMin();
+    void decreaseKey(int i, int newVal);
+
+    int getMin() { return arr[0]; }
+
+    int currentSize() { return heapSize; }
+    void deleteKey(int i);
+    void insertKey(int x);
+};
+
+MinHeap::MinHeap(int totSize) {
+    heapSize = 0;
+    maxSize = totSize;
+    arr = new int[totSize];
+}
+
+void MinHeap::insertKey(int x) {
+    if (heapSize == maxSize) {
+        cout << "\nOverflow: Could not insertKey\n";
+        return;
+    }
+
+    heapSize++;
+    int i = heapSize - 1;
+    arr[i] = x;
+
+    while (i != 0 && arr[parent(i)] > arr[i]) {
+        swap(arr[i], arr[parent(i)]);
+        i = parent(i);
+    }
+}
+
+void MinHeap::decreaseKey(int i, int newVal) {
+    arr[i] = newVal;
+    while (i != 0 && arr[parent(i)] > arr[i]) {
+        swap(arr[i], arr[parent(i)]);
+        i = parent(i);
+    }
+}
+
+int MinHeap::removeMin() {
+    if (heapSize <= 0)
+        return INT_MAX;
+    if (heapSize == 1) {
+        heapSize--;
+        return arr[0];
+    }
+
+    int root = arr[0];
+    arr[0] = arr[heapSize - 1];
+    heapSize--;
+
+    MinHeapify(0);
+
+    return root;
+}
+
+void MinHeap::deleteKey(int i) {
+    decreaseKey(i, INT_MIN);
+    removeMin();
+}
+
+void MinHeap::MinHeapify(int i) {
+    int left = leftChild(i);
+    int right = rightChild(i);
+    int smallest = i;
+
+    if (left < heapSize && arr[left] < arr[i])
+        smallest = left;
+    if (right < heapSize && arr[right] < arr[smallest])
+        smallest = right;
+
+    if (smallest != i) {
+        swap(arr[i], arr[smallest]);
+        MinHeapify(smallest);
+    }
+}
+
+int main() {
+    MinHeap h(15);
+
+    int n;
+    cout << "Enter the number of keys: ";
+    cin >> n;
+
+    cout << "Enter " << n << " keys: ";
+    for (int i = 0; i < n; ++i) {
+        int key;
+        cin >> key;
+        h.insertKey(key);
+    }
+
+    cout << "The current size of the heap is " << h.currentSize() << "\n";
+    cout << "The current minimum element is " << h.getMin() << "\n";
+
+    h.deleteKey(2);
+
+    cout << "The current size of the heap is " << h.currentSize() << "\n";
+
+    h.insertKey(16);
+    cout << "The current size of the heap is " << h.currentSize() << "\n";
+    cout << "The current minimum element is " << h.getMin() << "\n";
+
+    return 0;
+}
